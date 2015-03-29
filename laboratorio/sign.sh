@@ -2,16 +2,17 @@
 
 FILE=$1
 YOURKEY=$2
+YOURSERVER=$3
 
 sign() {
   for line in $(cat $FILE); do
     echo "$USER - $(date +"%x %r %Z"):"
 
-    gpg --keyserver pgp.mit.edu --search-keys $line
+    gpg --keyserver ${YOURSERVER} --search-keys $line
     gpg -u $YOURKEY --sign-key $line
     gpg --armor --export $line > keys/$line.asc
-    gpg --keyserver pgp.mit.edu --recv-key $line
-    gpg --keyserver pgp.mit.edu --send-key $line
+    gpg --keyserver ${YOURSERVER} --recv-key $line
+    gpg --keyserver ${YOURSERVER} --send-key $line
   done
 
   exit 1
@@ -22,8 +23,8 @@ email() {
   ls
 }
 
-if [ $# -lt 2 ]; then
-  echo "example: sh sign.sh keys.txt {your_key}"
+if [ $# -lt 3 ]; then
+  echo "example: sh sign.sh keys.txt {your key} {your server}"
 else
   # sign
   email
