@@ -11,8 +11,8 @@ sign() {
     gpg --keyserver ${YOURSERVER} --search-keys $line
     gpg -u $YOURKEY --sign-key $line
     gpg --armor --export $line > keys/$line.asc
-    gpg --keyserver ${YOURSERVER} --recv-key $line
     gpg --keyserver ${YOURSERVER} --send-key $line
+    gpg --keyserver ${YOURSERVER} --recv-key $line
   done
 
   exit 1
@@ -26,6 +26,6 @@ email() {
 if [ $# -lt 3 ]; then
   echo "example: sh sign.sh keys.txt {your key} {your server}"
 else
-  # sign
+  sign
   email
 fi
