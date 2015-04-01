@@ -7,3 +7,10 @@ Principles and Practice (6th Edition) Hardcover – March 16, 2013
 
 - Scripts de laboratório de segurança em computação.
 - Programas dos trabalhos da disciplina
+
+
+# Vigenere (Cipher)
+
+```
+python ciphers/vigenere.py -i ciphers/plain.txt -o ciphers/cipher.txt -k gandalf
+```
