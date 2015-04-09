@@ -1,6 +1,10 @@
 #!/usr/bin/python
 
-import sys, getopt, re
+import sys, getopt
+
+class Error(Exception):
+    """Deciphering Exception Bad Password as Input."""
+    pass
 
 def vigenereCipher(plainText, key):
 
