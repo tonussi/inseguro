@@ -2,6 +2,31 @@
 
 import sys, getopt
 
+"""
+<h>Vigenere Cipher Crypto Analysis</h>
+
+<p>Inseguro uma vez que você sae o tamnho da palavra chave.</p>
+<p>Se for n o tamanho, você pode quebrar em n cosets e atacar o
+   cifrador usando analise de frequência</p>
+
+<h>Friedman Test</h>
+
+<p>Achando a indidência da conincidência para um ensaio do textocifrado
+   podemos indicar quando ou não a substituição polialfabética foi usada para
+   encriptar a mensagem. A indicência da conincidência é a probabilidade de que
+   2 letras selecionadas aleatóriamente são as mesmas.</p>
+<pre>I = 1/(n(n-1)) * sum from {i = 0} to {i = 25} of n_i * (n_i - 1)</pre>
+<p>Onde n0, n1, n2, ..., n25 são respectivamente A, B, C, D, ..., Z</p>
+<p>Para achar a estimativa do tamanho da chave:</p>
+<pre>k_english = 0.0265 * n / (0.065 - I + n * (I - 0.085)</pre>
+
+<h>Kasisike Test</h>
+<p>Apenas pega o texto cifrado e busca por padrões de grupos incidência assim
+   medindo a distância entre eles, consegue-se uma nossao do tamanho da chave
+   que no Vigenere é uma chave duplicada para ficar do tamanho do texto.
+   O Vigenere é uma ideia de que a chave recebe tratamento de segurança também
+   não apenas o texto.</p>
+"""
 class Error(Exception):
     """Deciphering Exception Bad Password as Input."""
     pass
@@ -33,6 +58,17 @@ def vigenereCipher(plainText, key):
 		j+=1
 
 	return cipherText
+
+"""
+n: numeral
+arr: array
+"""
+def friedman(n):
+    res = 0
+    for letter in map(ord, ['A', 'B', 'C', 'D', 'E', 'R', 'F', 'G', 'H', 'I', 'J', 'L', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'W', 'Z']):
+        res = (res + letter - 1) * letter
+    res = res * (1 / (n * (n - 1)))
+    return res
 
 def vigenereDecipher(cipherText, key):
 
