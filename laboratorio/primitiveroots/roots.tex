@@ -1,0 +1,262 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite, amsmath, graphicx, hyperref, algorithm}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil, english]{babel}
+\usepackage[noend]{algpseudocode}
+
+\title{Algorítmo Gerador das Raízes Primitivas Menores que um Número Inteiro}
+
+\author {
+  Lucas Tonussi\\
+  \textsc{lptonussi@gmail.com}\\
+  \small{Ciência da Computação}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Criação de um gerador das raízes primitivas menor que um inteiro qualquer.
+\end{abstract}
+
+\IEEEoverridecommandlockouts
+
+\begin{keywords}
+Raízes Primitivas, Maior Divisor Comum, Aritmética Modular
+\end{keywords}
+
+\IEEEpeerreviewmaketitle
+
+\section{Introdução}
+
+Esse artigo mostra os algorítimos em forma de pseudo-código, das funções usadas
+no programa \textit{PrimitiveRoots} que acompanha esse documento. A linguagem é
+em python pela facilidade em traduzir pseudo-código teórico para um objeto
+executável. Basicamente para rodar o código basta no seu terminal (unix/windows)
+com Python 2 basta executar \textsc{python proots.py}. Com Python 3 no seu
+terminal basta escrever \textsc{python3 roots.py}.
+
+\section{Calculo do Totient $\phi(n)$}
+
+O cálculo do TOTIENT $\phi(n)$ é feito usando o algoritmo de Euclides
+\cite{totient}, que consta na seção \textit{Computing Euler's function} na
+Wikipédia. Assim como também o $MDC_{RECURSIVO}$ é o algoritmo de Euclides
+\cite{gcd}.
+
+\begin{algorithm}
+  \caption{Função de Euler para $MDC_{RECURSIVO}$}\label{mdcrec}
+  \begin{algorithmic}
+    \Function{$MDC_{RECURSIVO}$}{N : Integer, k : Integer}
+      \If {$k == 0$}
+        \State \Return N
+      \EndIf
+      \If {$N == 0$}
+        \State \Return k
+      \EndIf
+      \Return $MDC_{RECURSIVO}(k, N \div k)$
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+Abaixo está o algoritmo de Euclides para calcular $\phi(n)$. Essa função é para
+utilizar como comparação da quantidades de raízes primitivas achadas de dado um
+número de entrada N, primo no Algoritmo \ref{proots}. Ou seja, fazer
+totient(totient(n)) tem que dar igual ao comprimento do arranjo que guarda todos
+as raízes primitivas computadas no Algoritmo \ref{proots}.
+
+\begin{algorithm}
+  \caption{Função de Euler de Totient}\label{totient}
+  \begin{algorithmic}
+    \Function{totient}{N : Integer}
+      \State {$m \gets 0$}
+      \State {$k \gets 1$}
+      \While {$k < n + 1$}
+        \If {$MDC_{RECURSIVO}(N, k) == 1$}
+          \State $m \gets m + 1$
+        \EndIf
+        \State {$k \gets k + 1$}
+      \EndWhile
+      \Return m
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+\section{Teste de Primo}
+
+Para calcular se dado número inteiro é primo \cite{primtest} usei um algoritmo
+em pseudo código que usa aritmética modular para chegar na resposta.
+
+\begin{algorithm}
+  \caption{Testador de Número Primo}\label{isprime}
+  \begin{algorithmic}
+    \Function{testaPrimo}{N : Integer}
+    \If {$N \le 1$}
+      \Return False
+    \EndIf
+    \If {$N \le 3$}
+      \Return True
+    \EndIf
+    \If {$N \div 2 = 0 \textbf{ or } N \div 3 = 0$}
+      \Return False
+    \EndIf
+    \State $i \gets 5$
+    \While {$i \times i \le n$}
+      \If {$N \div i = 0 \textbf{ or } N \div (i + 2) = 0$}
+        \State \Return False
+      \EndIf
+      \State $i \gets i + 6$
+    \EndWhile
+    \Return True
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+\section{Computando Raízes Primitivas}
+
+O Algoritmo de Divisão Trivial serve para achar os fatores primos de um número.
+Juntamento com seu conjunto de primos de 2 até $n - 1$.
+
+\begin{algorithm}
+  \caption{Divisão por Tentativas} \label{trialdiv}
+  \begin{algorithmic}
+    \Function{divisaoTentativas}{primos : Lista, n : Inteiro}
+      \If {$n < 2$}
+        \Return ConjuntoVazio
+      \EndIf
+      \State {fatores = Conjunto}
+      \For {i de 0 até $comprimento(primos)$}
+        \While {$n \div p = 0$}
+          \State {$fatores \gets primos[i]$}
+          \State {n = n / p}
+        \EndWhile
+      \EndFor
+      \If {$n > 1$}
+        \State {$fatores \gets n$}
+      \EndIf
+      \Return fatores
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+Segundo consta na Wikipédia \cite{primtest} uma computação eficaz para achar as
+raízes primitivas de um número inteiro positivo maior é bastante complicada
+\cite{robbins}\cite{vonzur}. Observe que $testaPrimo(n)$ está explicado na seção
+anterior. Considerar que a atribuição de $Conjunto$ abaixo mantém valores únicos
+dentro do arranjo (não repetidos). O valor de N deve ser primo caso contrário o
+Algorítimo falha de início. Antes de testar se os valores de m (Naturais) de 2
+até N o Algorítimo fatora em primos o valor de $phi(N) = N - 1$. Eu inverti a
+lógica de teste diferente à 1 pois eu tenho que testar se todo conjunto de
+fatores computados dão igual à diferente de 1, e aí sim proclamar o valor $m$
+sendo testado, como um valor raiz primitiva e então armazenar no conjunto de
+raízes primitivas $primitiveRoots$.
+
+\begin{algorithm}
+  \caption{Computando Raízes Primitivas}\label{proots}
+  \begin{algorithmic}
+    \Function{raizesPrimitivas}{N : Integer}
+      \If {N não é primo}
+        \State \Return {"Entrada precisa ser um nro primo"}
+      \EndIf
+      \State {$totiente \gets N - 1$}
+      \State $fatores \gets Conjunto$
+      \State $primos \gets Conjunto$
+      \State $raizesPrimitivas\gets Conjunto$
+      \For {v from 2 to n - 1}
+        \If {$testaPrimo(n)$}
+          \State{$primos \gets v$}
+        \EndIf
+      \EndFor
+      \State {$fatores \gets divisaoTentativas(primos, 
+      totient)^{\ref{trialdiv}}$}
+      \For {m de 2 até n}
+        \State {$todosRaiz \gets True$}
+        \For {para todo $pf$ no conjunto $fatores$}
+          \If {$m^{\frac{\phi(n)}{pf}} \div n = 1$}
+            \State {$todosRaiz \gets False$}
+            \State {\textbf{break}}
+          \EndIf
+        \EndFor
+        \If {todosRaiz = True}
+          \State $raizesPrimitivas \gets m$
+        \EndIf
+      \EndFor
+      \Return raizesPrimitivas
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+O algoritmo para computar as raízes de um valor inicial N (inteiro), usa um
+\textit{hack} de um Criptografo chamado Bruce Schneier. O pseudo-código a seguir
+é baseado no livro \textit{Applied Cryptography} de Bruce Schneier
+\cite{schneier}. E dado uma base, expoente, e um valor para módulo
+respectivamente \textbf{b}, \textbf{e}, e \textbf{m} o algorítimo computa $b^e
+(\div m)$, exemplo se b = 4, e = 13, m = 497, note que o expoente é 1011 em
+binário, sendo ele 4 digito o algoritmo não deve demorar mais que 4 iterações
+para responder o valor 445 \cite{powermod}. \\
+
+\begin{algorithm}
+  \caption{Base, Potência e Modulo}\label{powmod}
+  \begin{algorithmic}
+    \Function{moduloPotencia}{base : Integer, expoente : Integer, modulo : 
+    Integer}
+      \If {$(m - 1) * (m - 1) \text{ does not overflow base}$}
+        \State \textbf{raise} \textit{OverflowInteger64Exception}
+      \EndIf
+      \State {$result \gets 1$}
+      \State {$base \gets base \div modulo$}
+      \While {$exponent < 0$}
+        \If {$expoente \div 2 = 1$}
+          \State {$resultado \gets (resultado \times base) \div modulo$}
+        \EndIf
+        \State {$expoente \gets expoente \gg 1$}
+        \State {$base \gets (base \times base) \div modulo$}
+      \EndWhile
+      \Return resultado
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+\section{Conclusões}
+
+Problema do algoritmo de fatoração é que ele é muito ruim para grandes números
+quebrando toda sequencia do algoritmo de testar raízes primitivas. Existem 
+outros métodos de fatoras em primos porém eu não consegui implementar, e optei
+pelo método comumente conhecido de fatoração por tentativas. O Algoritmo do 
+Bruce Schneier \cite{schneier} é bom para números grandes visto que ele trabalha
+melhor o expoente da base, usando deslocamento para esquerda.
+
+\begin{thebibliography}{1}
+\bibitem{powermod} Pseudocode basiado no livro Applied Cryptography de Bruce
+Schneier.; Wikipédia disponível em:
+\href{http://en.wikipedia.org/wiki/Modular_exponentiation#Right-to-left_binary_method}{http://en.wikipedia.org/wiki/Modular\_exponentiation\#Right-to-left\_binary\_method}
+
+\bibitem{gcd} Euler Greatest Common Divisor Algorithm.; Wikipédia disponível em:
+\href{https://en.wikipedia.org/wiki/Euclidean_algorithm#Euclidean_division}{https://en.wikipedia.org/wiki/Euclidean\_algorithm\#Euclidean\_division}
+
+\bibitem{totient} Euler Totient Function.; Wikipédia disponível em:
+\href{https://en.wikipedia.org/wiki/Euler\%27s_totient_function#Computing_Euler.27s_function}{https://en.wikipedia.org/wiki/Euler's\_totient\_function}
+
+\bibitem{primtest} Pseudo-código para teste de números primos.; Wikipédia
+disponível em:
+\href{https://en.wikipedia.org/wiki/Primality_test#Pseudocode}{https://en.wikipedia.org/wiki/Primality\_test\#Pseudocode}
+
+\bibitem{citekey} Raíz primitiva módulo N.; Wikipédia disponível em:
+\href{http://en.wikipedia.org/wiki/Primitive_root_modulo_n}{http://en.wikipedia.org/wiki/Primitive\_root\_modulo\_n}
+
+\bibitem{vonzur} von zur Gathen, Joachim; Shparlinski, Igor (1998), "Orders of
+Gauss periods in finite fields", Applicable Algebra in Engineering,
+Communication and Computing 9 (1): 15–24, doi:10.1007/s002000050093, MR 1624824,
+"One of the most important unsolved problems in the theory of finite fields is
+designing a fast algorithm to construct primitive roots".
+
+\bibitem{robbins} Robbins, Neville (2006), Beginning Number Theory, Jones \&
+Bartlett Learning, p. 159, ISBN 9780763737689, "There is no convenient formula
+for computing [the least primitive root]".
+
+\bibitem{schneier} Schneier 1996, p. 244.
+\end{thebibliography}
+
+\smallskip
+
+\end{document}
