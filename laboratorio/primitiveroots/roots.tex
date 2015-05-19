@@ -167,7 +167,7 @@ raízes primitivas $primitiveRoots$.
           \State{$primos \gets v$}
         \EndIf
       \EndFor
-      \State {$fatores \gets divisaoTentativas(primos, 
+      \State {$fatores \gets divisaoTentativas(primos,
       totient)^{\ref{trialdiv}}$}
       \For {m de 2 até n}
         \State {$todosRaiz \gets True$}
@@ -198,7 +198,7 @@ para responder o valor 445 \cite{powermod}. \\
 \begin{algorithm}
   \caption{Base, Potência e Modulo}\label{powmod}
   \begin{algorithmic}
-    \Function{moduloPotencia}{base : Integer, expoente : Integer, modulo : 
+    \Function{moduloPotencia}{base : Integer, expoente : Integer, modulo :
     Integer}
       \If {$(m - 1) * (m - 1) \text{ does not overflow base}$}
         \State \textbf{raise} \textit{OverflowInteger64Exception}
@@ -220,9 +220,9 @@ para responder o valor 445 \cite{powermod}. \\
 \section{Conclusões}
 
 Problema do algoritmo de fatoração é que ele é muito ruim para grandes números
-quebrando toda sequencia do algoritmo de testar raízes primitivas. Existem 
+quebrando toda sequencia do algoritmo de testar raízes primitivas. Existem
 outros métodos de fatoras em primos porém eu não consegui implementar, e optei
-pelo método comumente conhecido de fatoração por tentativas. O Algoritmo do 
+pelo método comumente conhecido de fatoração por tentativas. O Algoritmo do
 Bruce Schneier \cite{schneier} é bom para números grandes visto que ele trabalha
 melhor o expoente da base, usando deslocamento para esquerda.
 
