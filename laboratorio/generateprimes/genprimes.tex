@@ -1,0 +1,115 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite, amsmath, graphicx, hyperref, algorithm}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil, english]{babel}
+\usepackage[noend]{algpseudocode}
+
+\title {
+$(\textit{Miller-Rabin}\text{ Vs }(\frac{\textit{Solovay-Strassen}}{
+  \textit{Adrien-Legendre}}))^{\frac{Mersenne-Twister}{Linux-Entropy}}$
+}
+
+\author {
+  Lucas Tonussi\\
+  \textsc{lptonussi@gmail.com}\\
+  \small{Ciência da Computação}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Esse artigo trás conclusões sobre a comparação entre \textit{Miller-Rabin} e
+\textit{Solovay-Strassen} como algoritmos de teste de número primos, impares e
+pseudo-aleatórios calculados através do algoritmo \textit{Mersenne-Twister}
+usando Entropia Linux.
+\end{abstract}
+
+\IEEEoverridecommandlockouts
+
+\begin{keywords}
+Teste de números primos, Miller-Rabin, Solovay-Strassen, Mersenne-Twister, 
+Adrien-Legendre, Números Pseudo Aleatórios, Entropia-Linux
+\end{keywords}
+
+\IEEEpeerreviewmaketitle
+
+\section{Introdução}
+
+\section{Algoritmo Solovay Strassen}
+
+Esse algoritmo trás uma perspectiva mais robusta e simples para verificar se um
+número ímpar é primo ou não (composto). A diferença no algorítimo de Solovay
+Strassen é o uso de um algoritmo interno recursivo bastante parecido do MCD
+euclidiano. Que é a notação $(\frac{a}{n})$ onde \textbf{a} é um aleatório como
+visto abaixo e n é um primo. Essa notação exige um processo recursivo para
+derivar modularmente. Em Python a solução estão nas linhas 35 à 46 que é o
+algoritmo de Adrien-Legendre que consta na wikipédia sobre o algoritmo Solovay
+Strassen. Para números grande e muitas iterações pegando valores aleatórios para
+Adrien-Legendre o algoritmo de Solovay-Strassen se sai melhor. Porém no geral
+para números grandes ambos utilizam a técnica bastante parecida de base com
+números aleatórios tentando prever um candidato. Ambos tem um custo temporal
+equivalente no geral, para um mesmo primo ambos e com acuracidade igual de 25
+iterações no máximo, ambos tiveram o mesmo desempenho e taxas de rejeições e
+taxas de acertos em qualificação de números primos, você pode executar o código
+utilizando \textbf{python} $\_\_init\_\_.py$ ou \textbf{python3}
+$\_\_init\_\_.py$. Ele criará um arquivo chamado entropy\cite{dd} e outro
+chamado stderr o primeiro contêm dados aleatórios providos pelo
+/dev/urandom\cite{dd} no Unix. Veja também o arquivo DATA que é a saída da minha
+execução do código em python em ambiente Linux.
+
+\begin{algorithm}
+  \caption{Algoritmo de Solovay Strassen}
+  \begin{algorithmic}
+    \Function{$Solovay Strassen$}{}
+      \vfil
+      \State {$primo \gets (Valor > 2)$}
+      \vfil
+      \State {$acuracidade \gets (Valor > 5)$}
+      \vfil
+      \While{$it \le k$}
+        \vfil
+        \State $a \gets \textit{Valor aleatório entre }
+               (2, \textit{ primo } - 1)$
+        \vfil
+        \State $x \gets \left(\frac{a}{primo} \right) \left( \frac{a_i}{primo}
+                  \right) \dots \left( \frac{a \cdot a_i}{primo}\right)$
+        \vfil
+        \State {$it \gets it + 1$}
+        \vfil
+      \EndWhile
+      \vfil
+      \If {$x = 0 \textbf{ or } a^{(n-1)/2} \not \equiv x \mod n$}
+        \State \Return \textit{Falso}
+      \EndIf
+      \vfil
+      \State \Return \textit{Verdadeiro}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+\section{Conclusões}
+
+A conclusão que eu chego é que Solovay-Strassen tem desempenho equivalente porém
+a sua taxa de precisão aumenta bastante quanto mais números aleatórios são
+testados como base para o algoritmo embutido do ADrien-Legendre. Mas ambos
+tiveram desempenho equivalente no sentido de taxa de rejeições e qualificações
+de primalidade. Para ambos eu utilizei o algoritmo de Mersenne
+Twister\cite{mersenne} com semente cortando uma parte gerado de
+\textit{/dev/urandom} a copia foi feita com o comando dd
+
+\begin{thebibliography}{1}
+  \bibitem{strassen} Solovay, Robert M.; Strassen, Volker (1977). "A fast
+  Monte-Carlo test for primality". Disponível em:
+  https://en.wikipedia.org/wiki/Solovay-Strassen\_primality\_test
+  \bibitem{mersenne} Twister, Mersenne "Pseudo código do algoritmo gerador de
+  pseudo aleatórios Mersenne Twister". Disponível em:
+  https://en.wikipedia.org/wiki/Mersenne\_Twister
+  \bibitem{dd} Linux/Unix, "Uso do comando unix \textit{dd} para /dev/urandom
+  como semente". Disponível em: http://linux.die.net/man/1/dd
+\end{thebibliography}
+
+\smallskip
+
+\end{document}
