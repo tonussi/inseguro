@@ -132,7 +132,7 @@ class PrimitiveRoots():
 
 def main():
     pr = PrimitiveRoots()
-    print (pr.proots(191))
+    print (pr.proots(331))
 
 if __name__ == "__main__":
     main()
