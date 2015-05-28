@@ -1,23 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import fractions, time, math, random
-
 class PrimitiveRoots():
-
     def totient(self, n):
         m = 0
         for k in range(1, n + 1):
-            if fractions.gcd(n, k) == 1:
+            if self.gcd(n, k) == 1:
                 m += 1
         return m
 
-    def mdcrec(self, a, b):
+    def gcd(self, a, b):
         if b == 0:
             return a
         if a == 0:
             return b
-        return self.mdcrec(b, a % b)
+        return self.gcd(b, a % b)
 
     def isprime(self, n):
         if n <= 1:
@@ -38,9 +35,9 @@ class PrimitiveRoots():
     # Zn^x are the congruence classes {1, 3, 5, 9,    #
     # 11, 13} there are phi(14) = 6 of them. Here     #
     # is a table of their powers modulo 14:           #
-    #-------------------------------------------------#
+    # -------------------------------------------------#
     # x      x  , x2  , x3 ,             ... (mod 14) #
-    #-------------------------------------------------#
+    # -------------------------------------------------#
     # 1  :   1                                        #
     # 3  :   3  ,  9  , 13 , 11 ,  5 ,  1             #
     # 5  :   5  ,  11 , 13 ,  9 ,  3 ,  1             #
@@ -64,16 +61,11 @@ class PrimitiveRoots():
 
         return fatores
 
-
     def proots(self, n):
-        print ("Valor de Entrada:", n)
 
         if not self.isprime(n):
-            return "Entrada precisa ser um nro primo"
+            raise ValueError('Entrada precisa ser um nro primo')
 
-        print ("Deve-se computar raizes primitivas: ", self.totient(self.totient(n)))
-
-        fatores = []
         primos = []
         proots = []
 
@@ -84,28 +76,16 @@ class PrimitiveRoots():
                 primos.append(v)
 
         primos = sorted(set(primos))
-        # print (primos)
-
         fatores = self.trialdiv(primos, totient)
-        # print (fatores)
-
-        print ('As classes congruentes de Z' + str(n) + 'x :', primos)
 
         for m in range(2, n - 1):
             todosRaiz = True
-            #######################################################
-            # Um nro m tal qual elevado a totient/p mod n         #
-            # e retornar um valor diferente de 1 é raiz primitiva #
-            #######################################################
             for pf in fatores:
                 if self.moduloPotencia(m, totient // pf, n) == 1:
                     todosRaiz = False
                     break
             if todosRaiz:
                 proots.append(m)
-
-        # print (len(sorted(set(proots))) == self.totient(self.totient(n)))
-
         return sorted(set(proots))
 
     ######################################################
@@ -123,16 +103,8 @@ class PrimitiveRoots():
         base = base % modulo
         while expoente > 0:
             if expoente % 2 == 1:
-                # print 'resultado =', resultado, '*', base, 'mod', modulo
                 resultado = (resultado * base) % modulo
             expoente = expoente >> 1
             base = (base * base) % modulo
 
         return resultado
-
-def main():
-    pr = PrimitiveRoots()
-    print (pr.proots(331))
-
-if __name__ == "__main__":
-    main()
