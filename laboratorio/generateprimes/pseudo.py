@@ -1,14 +1,29 @@
 # -*- coding: utf-8 -*-
 import random as rand
 
+PRIMES = [519878069892553235141397190298737286739825877226439147430912454004272781001637038640346339538649629,
+          323103497114757957186174589436449280288767412626506507174943551244501738918326009453141688315249717,
+          1362903349786808128793202403116054929856981632667425085455651252656914488151664892879732657971500289,
+          2577054182062792604887456316203707343524398267263472583145096980361556014200798979575929951395477211,
+          519878069892553235141397190298737286739825877226439147430912454004272781001637038640346339538649629,
+          323103497114757957186174589436449280288767412626506507174943551244501738918326009453141688315249717,
+          1362903349786808128793202403116054929856981632667425085455651252656914488151664892879732657971500289,
+          2577054182062792604887456316203707343524398267263472583145096980361556014200798979575929951395477211,
+          519878069892553235141397190298737286739825877226439147430912454004272781001637038640346339538649629,
+          323103497114757957186174589436449280288767412626506507174943551244501738918326009453141688315249717,
+          1362903349786808128793202403116054929856981632667425085455651252656914488151664892879732657971500289,
+          2577054182062792604887456316203707343524398267263472583145096980361556014200798979575929951395477211,
+          519878069892553235141397190298737286739825877226439147430912454004272781001637038640346339538649629,
+          323103497114757957186174589436449280288767412626506507174943551244501738918326009453141688315249717,
+          1362903349786808128793202403116054929856981632667425085455651252656914488151664892879732657971500289,
+          2577054182062792604887456316203707343524398267263472583145096980361556014200798979575929951395477211,
+          519878069892553235141397190298737286739825877226439147430912454004272781001637038640346339538649629,
+          323103497114757957186174589436449280288767412626506507174943551244501738918326009453141688315249717,
+          1362903349786808128793202403116054929856981632667425085455651252656914488151664892879732657971500289,
+          2577054182062792604887456316203707343524398267263472583145096980361556014200798979575929951395477211]
 
-class PseudoRandomGenerator(object):
-    def __init__(self, index=0):
-        self.N = 624
-        self.M = 397
-        self.mersenne_twister = [x for x in range(624)]
-        self.index = 0
 
+class PrimeTester(object):
     def solovay_strassen(self, primo, acuracidade=5):
         nro_tentativas = 0
 
@@ -25,7 +40,7 @@ class PseudoRandomGenerator(object):
 
             res = self.adrien_legendre(a, primo)
 
-            potencia = self.modulo_potencia(a, (primo - 1) // 2, primo)
+            potencia = self.potencia(a, (primo - 1) // 2, primo)
 
             if res == 0 or potencia != res % primo:
                 return (nro_tentativas, False)
@@ -52,14 +67,14 @@ class PseudoRandomGenerator(object):
             exp2 += 1
         return exp2, n
 
-    def testa_candidato(self, primo_candidato, primo, expoente, resto):
-        primo_candidato = self.modulo_potencia(primo_candidato, resto, primo)
+    def testacandidato(self, primo_candidato, primo, expoente, resto):
+        primo_candidato = self.potencia(primo_candidato, resto, primo)
 
         if primo_candidato == 1 or primo_candidato == primo - 1:
             return False
 
         for _ in range(expoente):
-            primo_candidato = self.modulo_potencia(primo_candidato, 2, primo)
+            primo_candidato = self.potencia(primo_candidato, 2, primo)
 
             if primo_candidato == primo - 1:
                 return False
@@ -82,12 +97,12 @@ class PseudoRandomGenerator(object):
             nro_tentativas += 1
 
             possivelmente_primo = rand.randint(2, primo - 2)
-            if self.testa_candidato(possivelmente_primo, primo, expoente, resto):
+            if self.testacandidato(possivelmente_primo, primo, expoente, resto):
                 return (nro_tentativas, False)
 
         return (nro_tentativas, True)
 
-    def modulo_potencia(self, base, exp, modulo):
+    def potencia(self, base, exp, modulo):
         res = 1
         base = base % modulo
         while exp > 0:
@@ -97,32 +112,42 @@ class PseudoRandomGenerator(object):
             base = (base * base) % modulo
         return res
 
-    def alimentar_gerador(self, seed):
+
+class Twister(object):
+    def __init__(self, index=0):
+        self.N = 624
+        self.M = 397
+        self.mersenne_twister = [x for x in range(624)]
+        self.index = 0
+
+    def alimentar(self, seed):
         self.index = 0
         self.mersenne_twister[0] = seed
         for i in range(1, self.N):
             self.mersenne_twister[i] = (
                 1812433253 * (self.mersenne_twister[i - 1] ^ (self.mersenne_twister[i - 1] >> 30)) + i)
 
-    def extract_number(self):
+    def extrair(self):
         if self.index == 0:
-            self.gerar_valores()
+            self.gerar()
         y = self.mersenne_twister[self.index]
-        y = self.y(y)
-        self.index += 1
+        y = self.mascara(y)
+        self.index = (self.index + 1) % len(self.mersenne_twister)
         return y
 
-    def y(self, y):
+    def mascara(self, y):
         y ^= (y >> 11)
         y ^= (y << 7) & 0x9d2c5680
         y ^= (y << 15) & 0xefc60000
         y ^= (y >> 18)
         return y
 
-    def gerar_valores(self):
+    def gerar(self):
         for i in range(self.N):
             y = (self.mersenne_twister[i] and 0x80000000) + (self.mersenne_twister[(i + 1) % self.N] and 0x7fffffff)
             self.mersenne_twister[i] = self.mersenne_twister[(i + 397) % self.N] ^ (y >> 1)
             if y % 2 != 0:
-                self.mersenne_twister[i] %= \
-                    3165575419983653090010874830062594726784053790351448619853466963349163783494971481831605960617320681
+                # Original : MT[i] := MT[i] xor (2567483615) // 0x9908b0df
+                # Hacked   : MT[i] := MT[i] mod (2567483615) // 0x9908b0df
+                # https://en.wikipedia.org/wiki/Mersenne_Twister
+                self.mersenne_twister[i] %= 2577054182062792604887456316203707343524398267263472583145096980361556014200798979575929951395477211
