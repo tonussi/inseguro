@@ -47,9 +47,12 @@ def main():
     dez_primos_miller_rabin = []
     dez_primos_solovay_strassen = []
 
-    dd()
-    n = lerarquivo('entropy')
-    pseudo.alimentar(int(n))
+    if sys.platform.startswith('win32') or sys.platform.startswith('cygwin'):
+        pseudo.alimentar(162432351271981621172)
+    elif sys.platform.startswith('linux'):
+        dd()
+        n = lerarquivo('entropy')
+        pseudo.alimentar(int(n))
 
     while len(dez_primos_miller_rabin) < QUANTIDADE:
         candidato = pseudo.extrair() | 0x1
