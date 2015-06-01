@@ -1,0 +1,269 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[greek, brazil, english]{babel}
+
+\hyphenation {}
+
+\title{\LARGE RSA}
+
+\author {
+  Lucas Tonussi\\
+  \textsc{lptonussi@gmail.com}\\
+  \small{Ciência da Computação}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Respostas do questionário sobre RSA e breve documentação do código em python que
+implementa o algoritmo de RSA e geração de chaves. Em sistemas Unix utiliza
+entropia interna do sistema operacional, em Windows não.
+\end{abstract}
+
+\IEEEoverridecommandlockouts
+
+\begin{keywords}
+RSA, Python, Prime Numbers, Solovay-Strassen, Euler, Adrien-Legendre, PKCS\#1,
+Python 3.
+\end{keywords}
+
+\IEEEpeerreviewmaketitle
+
+\section{Introdução}
+
+O código que acompanha esse artigo é a implementação em Python 3 do algoritmo
+RSA-(de)encriptação e geração de chaves como descrito na página 267 capítulo 9
+\cite{stallings} tanto de texto quanto de valores numéricos. para rodar o código
+basta executar no seu terminal:
+
+\hfil
+
+\begin{quotation}
+  \small \textit{python3} \textit{\_\_init\_\_.py} \textit{tamanho\_chave}
+  \textit{acuracidade} \\
+
+  exemplo: \textit{python3} \textit{\_\_init\_\_.py} 128 25
+\end{quotation}
+
+\hfil
+
+Atenção o código está preparado para ser executado tanto em ambiente Windows
+quanto Unix. Porém só o código só executa em Python 3. Portanto você tem que ter
+o Python versão 3 instalado no seu sistema. Em sistemas Unix, o comando dd irá
+ser utilizado para extrair valores aleatórios do sistema unix/linux, mais
+precisamente do arquivo /dev/urandom (unsigned random numbers generator). O
+programa utiliza Mersenne Twister para gerar dois primos aleatórios de 100
+dígitos decimais cada \footnote{em sistemas unix, utilizará /dev/urandom como
+  fonte entrópica para semente do gerador mersenne twister}. Após executar o
+código, ele vai esperar que você digite um valor de entrada, podendo ser um
+valor numérico ou uma \textit{string} qualquer. então aperte \textbf{enter} e
+ele irá computar os resultados. Ver o arquivo DATA que são uma execução com a
+entradas diferentes para serem encriptadas. No código para criptografar
+múltiplos bytes eu utilizo o abordagem parecida com o que está explicado na
+literatura, Página 268 - Capítulo 9 \cite{stallings}.
+
+\section{Quantidade de bits das chaves}
+
+O software permite que a entrada para quantidade de bits seja de 64 até 2048
+bits como especificado, porém nos casos especiais de 2048 bits de tamanho de
+chave o problema principal se encontra no algoritmo recursivo de Adrien-Legendre
+dentro do procedimento de Solovay-Strassen que é para testar pseudo aleatórios,
+a fim de encontrar números primos. O Miller Rabin também não desempenha bem
+ocorrendo falha de \textit{maximum recursion depth exceeded in comparison} no
+algoritmo de \textbf{gcd} dentro do Miller-Rabin. A notação de Adrien-Legendre é
+um \textbf{gcd} modificado, isto é: $n \gets (\frac{random_i}{prime})$. Consta
+no algoritmo em sí de Adrien-Legendre. Para o caso de 1024 bits ocorre também a
+mesma falha devido a tentativa de derivação de um número muito grande, do mesmo
+jeito que ocorreu com 2048 bits.
+
+\section{Questionário}
+
+\begin{enumerate}
+  \item O que é a função Totiente de Euler $\Phi(n)$ ? Por que os expoentes são
+  determinados módulo $\Phi(n)$, e não módulo n ?
+
+    \begin{enumerate}
+      \item Segundo o algoritmo RSA \cite{rsakey} o totiente vem a partir do
+      resultado da multiplicação entre os dois primos grandes pseudo-aleatórios;
+      providos externamente para o algoritmo RSA de geração de chaves.
+      \item Por isso, a função totient de Euler tem um papel especial no 
+      algoritmo RSA.
+      \item Como segue da teoria que $\Phi(n) \textit{ tal que } n \textit{ é
+      primo}$. é a ordem do grupo multiplicativo discreto modulo $n$, $n$ é um
+      primo.
+      \item $a^{\phi(n)} \equiv 1\ (\textrm{mod}\ n)$ quando n é um primo, isso
+      nos leva a um teorema chamado Pequeno Teorema de Fermat.
+      \item Segue que a inversa $a \leftarrow a^e\ (\textrm{mod}\ n)$ onde 
+      \textbf{e} é o expoente público (ciframento), é $a \leftarrow a^d\ 
+      (\textrm{mod}\ n)$ onde \textbf{d} é o expoente privado (deciframento)
+      é também $d \times e \equiv 1\ (\textrm{mod}\ \phi(n))$
+    \end{enumerate}
+
+  \item O que é PKCS \#1?
+
+    \begin{enumerate}
+      \item É uma padronização, usada no algoritmo RSA (na geração da inversa
+      multiplicativa) que consiste em escolher um valor $d$ que combinado na
+      equação $d*e \equiv 1\ (\textrm{mod}\ \lambda)$ \cite{pkcs1}, com $\lambda
+      = lcm(p - 1, q - 1)$ onde $lcm$ é o máximo multiplicador comum. Usando
+      $\lambda$ ao invés de $\Phi(n)$ permite \textbf{mais escolhas} de valores
+      para $d$. $\lambda$ pode também ser definido usando a função de Carmichael
+      \cite{carm}, $\lambda(n)$.
+      \item O método de encriptação do RSA utiliza o PKCS \#1 \textit{v1} (é um
+      esquema de enxerto (padding) próprio do algoritmo que aumenta a
+      aleatoriedade e adiciona estrutura a informação (mensagem criptografada
+      por \textbf{RSA}) seguindo esse protocolo é possível dizer diretamente se
+      uma mensagem é válida ou não para o algoritmo.
+      \item Pois os blocos da mensagem não podem ser maiores que $n = pq$, ao
+      dividir em blocos, existe uma forma especial de \textit{padding} para
+      complicar mais ainda a criptografia.
+      \item O meu programa em Python. Não implementa o PKCS \#1 em nenhum
+      momento.
+    \end{enumerate}
+
+  \item Como o RSA pode ser usado para ciframento de dados? E como seria usado
+  para assinatura?
+
+    \begin{enumerate}
+      \item A chave pública é usada para encriptar a mensagem. O expoente
+      público que é gerado no algoritmo (na parte de geração de chaves) pode ser
+      livremente distribuído para que alguém transforme uma assinatura,
+      documento, mensagem, valores, em um valor confuso e fortemente
+      não-derivável. E quem receber a mensagem pode decifrar usando a chave
+      privada o expoente privado que é resultado da inversa multiplicativa entre
+      o expoente público e o totiente de Euler de $n = p \times q$.
+    \end{enumerate}
+
+  \item Quais ataques são conhecidos do RSA ? Listar os conhecidos,
+  referenciando-os na literatura, e explique e mostre exemplos de pelo menos 2
+  dos ataques;
+
+    \begin{enumerate}
+      \item A segurança do RSA tem 5 principais abrangências de ataque ao RSA
+        \begin{enumerate}
+          \item \textbf{Brute force}: Envolve em tentar todas as possíveis
+          \textit{PRIVATE} \textit{KEYS}. Página 275 \cite{stallings}
+          \item \textbf{Mathematical attacks}: Existem muitas variações, mas
+          consiste em fatorar a multiplicação entre dois primos $p \times q$.
+          Página 275 \cite{stallings}
+          \item \textbf{Timing attacks}: Esse ataque depende do tempo em que o
+          algoritmo RSA demora para execução. Kocher, página 275 no livro-texto
+          \cite{stallings} aponta que são casos extremos onde o processador irá
+          demorar mais que o geralmente para fazer uma exponenciação modular,
+          esse mesmo é largamente usado pois é mais eficiente para o computador
+          quando se fala de números grandes. Para alguns valores de $a$ e $d$ na
+          operação $d \gets (d \times a)$ a multiplicação vai ser lenta, e o
+          atacante sabe quais são esses valores os quais serão lentos [KOCH96].
+            \begin{enumerate}
+              \item Esse exemplo pode ser encontrado na página 276 da literatura
+              \cite{stallings}.
+              \item Gere um valor aleatório r entre 0 e $n - 1$.
+              \item Calcule $C^{'} = C(r^e) \ (\textrm{mod}\ n)$ \textbf{e} é o 
+              expoente público.
+              \item Calcule $M^{'} = {(C^{'})}^d \ (\textrm{mod}\ n)$ com o 
+              próprio algoritmo RSA.
+              \item Calcule $M = M^{'} \times d \ (\textrm{mod}\ n)$ \textbf{d}
+              é a inversa multiplicativa de $r \ (\textrm{mod}\ n)$.
+              \item RSA reporta que de 2 a 10\% da performance desse algoritmo
+              sofre penalidade por causa de \textbf{blinding} (ciphertext x 
+              random number, para aumentar a confusão).
+            \end{enumerate}
+          \item \textbf{Hardware fault-based attack}: Esse envolve em induzir
+          possibilidade de falhas no processador que está gerando assinaturas
+          digitais.
+          \item \textbf{Chosen ciphertext attacks}: Esse tipo de ataque
+          explora propriedade do algoritmo RSA. Página 277 \cite{stallings}
+            \begin{enumerate}
+              \item Um simples exemplo de CCA contra RSA, o algoritmo pode ser
+              encontrando na página 277 \cite{stallings}:
+              \item Podemos tentar decifrar $C = M^e \ (\textrm{mod}\ n)$
+              \item Isto é, computar $X = (C \times 2^e) \ (\textrm{mod}\ n)$
+              \item Submeter $X$ como um texto-cifrado e receber $Y = X^d \
+              (\textrm{mod}\ n)$
+              \item Teremos: $X  = (C \ \textrm{mod}\ n) \times (2^e \
+              \textrm{mod}\ n) = (M^e \ \textrm{mod}\ n) \times (2^e \
+              \textrm{mod}\ n) = ((2 \times M)^e \ \textrm{mod}\ n)$
+              \item Chegamos à $Y = (2M) \ \textrm{mod}\ n$
+              \item M é dedutível.
+            \end{enumerate}
+        \end{enumerate}
+    \end{enumerate}
+
+  \item Por que é importante ter-se bons gerados de números aleatórios para
+  gerar chaves RSA ?
+
+    \begin{enumerate}
+      \item Uma análise comparando milhões de chaves publicas em 2012 por Arjen
+      K. Lenstra, James P. Hughes, Maxime Augier, Joppe W. Bos, Thorsten
+      Kleinjung and Christophe Wachter (Criptanalistas). Eles foram capazes de
+      fatorar apenas 0.2\% dessas mesmas usando o algoritmo de Euclides.
+      \cite{markoff} \cite{ronwaswrong}
+      
+      \item Ele usando uma artimanha, veja, se $n = pq$ é uma chave pública e
+      $n^{'} = p^{'}q^{'}$ é outras, então se por alguma chance $p = p^{'}$ (mas
+      $q$ não igual à $q^{'}$), então uma simples computação do $gcd(n, n^{'}) =
+      p$ fatora ambos $n$ e $n^{'}$, comprometendo ambas as chaves.
+      
+      \item Observe que você pode minimizar esse problema, basta utilizar um
+      gerador de \textit{sementes} com forte tendencia aleatória duplica o nível
+      de segurança. Ou adotar uma função determinística para escolha de $q$ dado
+      $p$, ao invés de escolher $p$ e $q$ independentemente.
+      
+      \item Gerador forte de números aleatórios é importante através de qualquer
+      fase na geração de chave pública. Veja que, se um gerador fraco de números
+      aleatórios for utilizado para chaves simétricas que estão sendo
+      distribuídas pelo algoritmo de RSA, então um atacante poderia transpassar
+      o algoritmo de RSA e adivinhar diretamente as chaves simétricas.
+    \end{enumerate}
+
+\end{enumerate}
+
+\begin{thebibliography}{1}
+
+\bibitem{markoff} Markoff, John (February 14, 2012). "Flaw Found in an Online
+Encryption Method". New York Times. Disponível em: http://www.nytimes.com/20\\
+12/02/15/technology/researchers-find-flaw-in-an-online-encryption-method.html
+
+\hfil
+
+\bibitem{ronwaswrong} "Ron was wrong, Whit is right". Disponível em:
+\href{http://eprint.iacr.org/2012/064.pdf}{pdf}.
+
+\hfil
+
+\bibitem{carm} "Carmichael Function". Disponível no:
+\href{http://mathworld.wolfram.com/CarmichaelFunction.html}{link}
+
+\hfil
+
+\bibitem{pkcs1} "The PKCS \#1 standard". Disponível no: 
+\href{https://en.wikipedia.org/wiki/PKCS\_1#Keys}{link}
+
+\hfil
+
+\bibitem{rsakey} "RSA Cryptosystem Key Generation". Disponível no:
+\href{https://en.wikipedia.org/wiki/RSA\_cryptosystem\#Key\_generation}{link}
+
+\hfil
+
+\bibitem{timat} Remote timing attacks are practical. SSYM'03 Proceedings of the
+12th conference on USENIX Security Symposium. Disponível em:
+\href{http://crypto.stanford.edu/~dabo/papers/ssl-timing.pdf}{pdf}
+
+\hfil
+
+\bibitem{stallings} Stallings, W. Cryptography and Network Security:
+Principles and Practice, 6th ed. Upper Saddle River, NJ: Prentice Hall, 2013,
+752p., \$142.40. ISBN: 13: 978-0133354690.
+
+\end{thebibliography}
+
+\smallskip
+
+\end{document}
